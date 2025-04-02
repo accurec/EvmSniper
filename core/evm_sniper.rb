@@ -198,8 +198,8 @@ class EvmSniper
   def handle_new_weth_pair(pair_address, token_1, token_2, token_1_reserves, token_2_reserves)
     @logger.info 'Handling new WETH pair...'
 
-    non_weth_token = token_1 == @config_manager.config[:weth_address] ? token_2 : token_1
-    weth_token_reserves = token_1 == @config_manager.config[:weth_address] ? token_1_reserves : token_2_reserves
+    non_weth_token = token_1.downcase == @config_manager.config[:weth_address].downcase ? token_2 : token_1
+    weth_token_reserves = token_1.downcase == @config_manager.config[:weth_address].downcase ? token_1_reserves : token_2_reserves
     looks_good = false
 
     # First, check if the rserves are big enough
