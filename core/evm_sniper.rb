@@ -181,7 +181,7 @@ class EvmSniper
       @logger.info "  #{key.to_s.capitalize}: #{value}"
     end
 
-    if !(token_1 == @config_manager.config[:weth_address] || token_2 == @config_manager.config[:weth_address])
+    if !(token_1.downcase == @config_manager.config[:weth_address].downcase || token_2.downcase == @config_manager.config[:weth_address].downcase)
       @logger.info 'None of tokens is WETH, skipping this pair!'
       return
     end
