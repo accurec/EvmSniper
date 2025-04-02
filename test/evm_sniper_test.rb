@@ -5,9 +5,6 @@ require_relative '../core/evm_sniper'
 require 'byebug'
 
 class EmvSniperTest < Minitest::Test
-  def setup
-  end
-
   def test_check_eth_evm_sniper
     @eth_evm_sniper = EvmSniper.new(ConfigManager.new(Enums::Network::ETH), true, Enums::ListenerMode::TRANSFER)
     @eth_evm_sniper.check_https_connection_and_config
@@ -30,6 +27,6 @@ class EmvSniperTest < Minitest::Test
 
   def test_check_eth_evm_sniper_owner
     @eth_evm_sniper = EvmSniper.new(ConfigManager.new(Enums::Network::ETH), true, Enums::ListenerMode::TRANSFER)
-    @eth_evm_sniper.check_erc20_owner('0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48')
+    @eth_evm_sniper.get_erc20_owner('0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48')
   end
 end

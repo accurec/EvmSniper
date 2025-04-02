@@ -32,81 +32,6 @@ class EvmSniper
     end
   end
 
-  # This method will be called when our server actually receives a request
-  # def call(env)
-  #   # Just log what happened
-  #   @logger.info "Received request: #{env['REQUEST_METHOD']} #{env['PATH_INFO']}."
-
-  #   # Below code is for learning an historical purposes
-  #   # @logger.info "Getting current block number..."
-  #   # block_number = @client.eth_block_number["result"].to_i(16)
-  #   # @logger.info("Current block number is #{block_number}.")
-
-  #   # [200, {'Content-Type' => 'application/json'}, ['{"block_number": "' + "#{block_number}" + '"}']]
-  # end
-
-  def check_https_connection_and_config
-    @logger.info "Getting current block number..."
-    block_number = @client.eth_block_number["result"].to_i(16)
-    @logger.info("Current block number is #{block_number}.")
-  end
-
-  def check_erc20_owner(erc20_address)
-    @logger.info "Checking the owner of #{erc20_address}..."
-    erc20_abi = File.read('/workspaces/ruby-3/evm_sniper/abi/erc20_ownable.json')
-    erc20_contract = Eth::Contract.from_abi(name: 'ERC20', address: erc20_address, abi: erc20_abi)
-    owner = @client.call(erc20_contract, 'owner')
-    @logger.info "The owner is #{owner}."
-  end
-
-  def setup_logger
-    @logger = Logger.new($stdout)
-    @logger.level = Logger::INFO
-    
-    # Custom format: [TIME] [SEVERITY] MESSAGE
-    @logger.formatter = proc do |severity, datetime, progname, msg|
-      timestamp = datetime.strftime('%Y-%m-%d %H:%M:%S')
-      "[#{timestamp}] [#{severity}] #{msg}\n"
-    end
-    
-    @logger.info "Logger initialized for EvmSniper."
-  end
-
-  def setup_websocket_listener
-      # EM - Event Machine - this is needed for async event processing from websockets
-      EM.run do
-        websocket = Faye::WebSocket::Client.new(@config_manager.config[:wss_uri])
-
-        # Opening connection to the WSS and sending logs subscribe message to start listening
-        websocket.on :open do |event|
-          if @listener_mode == Enums::ListenerMode::TRANSFER
-            listen_to_transfers(websocket)
-          elsif @listener_mode == Enums::ListenerMode::CREATE_PAIR
-            listen_to_uniswap_pair_create(websocket)
-          end
-        end
-
-        # Do something whenever we receive a log message from websocket listener
-        websocket.on :message do |event|
-          if @listener_mode == Enums::ListenerMode::TRANSFER
-            handle_transfer_message(event.data)
-          elsif @listener_mode == Enums::ListenerMode::CREATE_PAIR
-            handle_uniswap_pair_create_message(event.data)
-          end
-        end
-
-        # Log that websocket connection has been closed
-        websocket.on :close do |event|
-          handle_websocket_close
-        end
-      end
-  end
-
-  def handle_websocket_close
-    @logger.info "Websocket connection has been closed! Reconnecting..."
-    EM.add_timer(3) { setup_websocket_listener }
-  end
-
   # ======= Transfers
 
   def listen_to_transfers(websocket)
@@ -227,14 +152,20 @@ class EvmSniper
     pair_address = "0x" + event['data'][-104..-65]
     length = event['data'][-64..-1].hex
     token_reserves = get_pair_token_reserves(pair_address)
+    # pair_address_owner = get_erc20_owner(pair_address)
+    # token_1_owner = get_erc20_owner(token_1)
+    # token_2_owner = get_erc20_owner(token_2)
 
     event_data = {
       tx_hash: event['transactionHash'],
       block_number: event['blockNumber'].hex,
       log_index: event['logIndex'].hex,
       token_1: token_1,
+      # token_1_owner: token_1_owner,
       token_2: token_2,
+      # token_2_owner: token_2_owner,
       pair_address: pair_address,
+      # pair_address_owner: pair_address_owner,
       length: length,
       pair_total_supply: get_pair_total_supply(pair_address),
       token_1_reserves: token_reserves[0],
@@ -257,6 +188,8 @@ class EvmSniper
     # You could add database storage here
     # store_event(event_data)
   end
+
+  # ======= Pair handling
 
   # TODO: add magic number values to config
   def handle_new_weth_pair(pair_address, token_1, token_2, token_1_reserves, token_2_reserves)
@@ -300,6 +233,56 @@ class EvmSniper
     @logger.info 'Handling new WETH pair done.'
   end
 
+  # ======= Helpers
+
+  def setup_logger
+    @logger = Logger.new($stdout)
+    @logger.level = Logger::INFO
+    
+    # Custom format: [TIME] [SEVERITY] MESSAGE
+    @logger.formatter = proc do |severity, datetime, progname, msg|
+      timestamp = datetime.strftime('%Y-%m-%d %H:%M:%S')
+      "[#{timestamp}] [#{severity}] #{msg}\n"
+    end
+    
+    @logger.info "Logger initialized for EvmSniper."
+  end
+
+  def setup_websocket_listener
+      # EM - Event Machine - this is needed for async event processing from websockets
+      EM.run do
+        websocket = Faye::WebSocket::Client.new(@config_manager.config[:wss_uri])
+
+        # Opening connection to the WSS and sending logs subscribe message to start listening
+        websocket.on :open do |event|
+          if @listener_mode == Enums::ListenerMode::TRANSFER
+            listen_to_transfers(websocket)
+          elsif @listener_mode == Enums::ListenerMode::CREATE_PAIR
+            listen_to_uniswap_pair_create(websocket)
+          end
+        end
+
+        # Do something whenever we receive a log message from websocket listener
+        websocket.on :message do |event|
+          if @listener_mode == Enums::ListenerMode::TRANSFER
+            handle_transfer_message(event.data)
+          elsif @listener_mode == Enums::ListenerMode::CREATE_PAIR
+            handle_uniswap_pair_create_message(event.data)
+          end
+        end
+
+        # Log that websocket connection has been closed
+        websocket.on :close do |event|
+          handle_websocket_close
+        end
+      end
+  end
+
+  def handle_websocket_close
+    @logger.info "Websocket connection has been closed! Reconnecting..."
+    EM.add_timer(3) { setup_websocket_listener }
+  end
+
   def fetch_uniswap_pair_abi
     return @abi unless @abi.nil?
 
@@ -310,6 +293,23 @@ class EvmSniper
     @abi
   rescue => e
     @logger.error "Failed to fetch Uniswap Pair ABI: #{e.message}"
+  end
+
+  def check_https_connection_and_config
+    @logger.info "Getting current block number..."
+    block_number = @client.eth_block_number["result"].to_i(16)
+    @logger.info("Current block number is #{block_number}.")
+  end
+
+  def get_erc20_owner(erc20_address)
+    @logger.info "Checking the owner of #{erc20_address}..."
+    erc20_abi = File.read('/workspaces/ruby-3/evm_sniper/abi/erc20_ownable.json')
+    erc20_contract = Eth::Contract.from_abi(name: 'ERC20', address: erc20_address, abi: erc20_abi)
+    byebug
+    erc20_owner = @client.call(erc20_contract, 'owner')
+    @logger.info "The owner is #{erc20_owner}."
+
+    erc20_owner
   end
 
   # TODO: can combine get_pair_total_supply and get_pair_token_reserves
