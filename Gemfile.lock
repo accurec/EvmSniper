@@ -1,0 +1,96 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    activesupport (8.0.2)
+      base64
+      benchmark (>= 0.3)
+      bigdecimal
+      concurrent-ruby (~> 1.0, >= 1.3.1)
+      connection_pool (>= 2.2.5)
+      drb
+      i18n (>= 1.6, < 2)
+      logger (>= 1.4.2)
+      minitest (>= 5.1)
+      securerandom (>= 0.3)
+      tzinfo (~> 2.0, >= 2.0.5)
+      uri (>= 0.13.1)
+    base64 (0.2.0)
+    benchmark (0.4.0)
+    bigdecimal (3.1.9)
+    byebug (12.0.0)
+    concurrent-ruby (1.3.5)
+    connection_pool (2.5.0)
+    csv (3.3.3)
+    dotenv (3.1.7)
+    drb (2.2.1)
+    eth (0.5.13)
+      forwardable (~> 1.3)
+      keccak (~> 1.3)
+      konstructor (~> 1.0)
+      openssl (>= 2.2, < 4.0)
+      rbsecp256k1 (~> 6.0)
+      scrypt (~> 3.0)
+    eventmachine (1.2.7)
+    faye-websocket (0.11.3)
+      eventmachine (>= 0.12.0)
+      websocket-driver (>= 0.5.1)
+    ffi (1.17.1)
+    ffi (1.17.1-x86_64-linux-gnu)
+    ffi-compiler (1.3.2)
+      ffi (>= 1.15.5)
+      rake
+    forwardable (1.3.3)
+    httparty (0.23.1)
+      csv
+      mini_mime (>= 1.0.0)
+      multi_xml (>= 0.5.2)
+    i18n (1.14.7)
+      concurrent-ruby (~> 1.0)
+    keccak (1.3.2)
+    konstructor (1.0.2)
+    logger (1.7.0)
+    mini_mime (1.1.5)
+    mini_portile2 (2.8.8)
+    minitest (5.25.5)
+    multi_xml (0.7.1)
+      bigdecimal (~> 3.1)
+    nio4r (2.7.4)
+    openssl (3.3.0)
+    pkg-config (1.6.0)
+    puma (6.6.0)
+      nio4r (~> 2.0)
+    rake (13.2.1)
+    rbsecp256k1 (6.0.0)
+      mini_portile2 (~> 2.8)
+      pkg-config (~> 1.5)
+      rubyzip (~> 2.3)
+    rubyzip (2.4.1)
+    scrypt (3.0.8)
+      ffi-compiler (>= 1.0, < 2.0)
+      rake (>= 9, < 14)
+    securerandom (0.4.1)
+    tzinfo (2.0.6)
+      concurrent-ruby (~> 1.0)
+    uri (1.0.3)
+    websocket-driver (0.7.7)
+      base64
+      websocket-extensions (>= 0.1.0)
+    websocket-extensions (0.1.5)
+
+PLATFORMS
+  ruby
+  x86_64-linux
+
+DEPENDENCIES
+  activesupport
+  byebug
+  dotenv
+  eth
+  eventmachine
+  faye-websocket
+  httparty
+  minitest
+  puma
+
+BUNDLED WITH
+   2.5.22
