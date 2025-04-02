@@ -4,5 +4,5 @@
 # Byebug files
 .byebug_history
 
-/out/*
-!/out/
+out/*
+!out/
