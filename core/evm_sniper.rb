@@ -152,12 +152,15 @@ class EvmSniper
     pair_address = "0x" + event['data'][-104..-65]
     length = event['data'][-64..-1].hex
     token_reserves = get_pair_token_reserves(pair_address)
+    tx_hash = event['transactionHash']
+    sender = get_sender_from_transaction_hash(tx_hash)
     # pair_address_owner = get_erc20_owner(pair_address)
     # token_1_owner = get_erc20_owner(token_1)
     # token_2_owner = get_erc20_owner(token_2)
 
     event_data = {
-      tx_hash: event['transactionHash'],
+      tx_hash: tx_hash,
+      sender: sender,
       block_number: event['blockNumber'].hex,
       log_index: event['logIndex'].hex,
       token_1: token_1,
@@ -333,5 +336,13 @@ class EvmSniper
     [token_0_reserve, token_1_reserve]
   rescue => e
     @logger.error "Failed to get pair #{pair_address} token reserves. #{e.message}"
+  end
+
+  def get_sender_from_transaction_hash(tx_hash)
+    @logger.info "Getting sender from transaction #{tx_hash}..."
+    sender = @client.eth_get_transaction_by_hash(tx_hash)['result']['from']
+    @logger.info "The sender is #{sender}."
+
+    sender
   end
 end
