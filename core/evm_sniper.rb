@@ -308,7 +308,6 @@ class EvmSniper
     @logger.info "Checking the owner of #{erc20_address}..."
     erc20_abi = File.read('/workspaces/ruby-3/evm_sniper/abi/erc20_ownable.json')
     erc20_contract = Eth::Contract.from_abi(name: 'ERC20', address: erc20_address, abi: erc20_abi)
-    byebug
     erc20_owner = @client.call(erc20_contract, 'owner')
     @logger.info "The owner is #{erc20_owner}."
 

@@ -3,7 +3,7 @@ require './utils/config'
 require './utils/enums'
 
 evm_sniper = EvmSniper.new(
-  ConfigManager.new(Enums::Network::ETH), 
+  ConfigManager.new(Enums::Network::BASE), 
   false, 
   Enums::ListenerMode::CREATE_PAIR
 )
